@@ -10,6 +10,16 @@ import type {
   FlightBooking,
 } from '../types';
 
+export class ApiError extends Error {
+  status?: number;
+
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '',
 });
@@ -23,13 +33,9 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.reload();
-    }
     const msg =
       err.response?.data?.detail ?? err.response?.data?.message ?? err.message ?? 'Error del servidor';
-    return Promise.reject(new Error(msg));
+    return Promise.reject(new ApiError(msg, err.response?.status));
   }
 );
 

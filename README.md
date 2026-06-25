@@ -32,19 +32,11 @@ npm install
 
 ### Variables de Entorno
 
-En desarrollo, `.env` deja `VITE_API_URL` vacío para que Vite haga proxy al backend (evita errores CORS):
-
-```env
-VITE_API_URL=
-```
-
-Para producción, apunta al backend:
+En desarrollo y producción, apunta al backend:
 
 ```env
 VITE_API_URL=http://localhost:8081
 ```
-
-> **Nota:** El frontend corre en `http://localhost:5174`. Si ves "Network Error" al registrar/login, reinicia el backend (necesita CORS habilitado) y el frontend (`npm run dev`).
 
 ### Ejecutar la Aplicacion
 

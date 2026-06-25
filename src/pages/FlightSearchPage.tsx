@@ -59,11 +59,6 @@ export default function FlightSearchPage() {
   };
 
   const handleBook = async (flightId: number) => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-
     setBookingError('');
     setBookingSuccess('');
 
@@ -240,13 +235,22 @@ export default function FlightSearchPage() {
                       <td className="px-4 py-3 text-sm text-gray-700">{formatDate(flight.estArrivalTime)}</td>
                       <td className="px-4 py-3 text-sm text-gray-700">{flight.availableSeats}</td>
                       <td className="px-4 py-3 text-sm">
-                        <button
-                          onClick={() => handleBook(flight.id)}
-                          disabled={isAuthenticated && flight.availableSeats === 0}
-                          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                        >
-                          {isAuthenticated ? 'Reservar' : 'Inicia sesión para reservar'}
-                        </button>
+                        {isAuthenticated ? (
+                          <button
+                            onClick={() => handleBook(flight.id)}
+                            disabled={flight.availableSeats === 0}
+                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                          >
+                            Reservar
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => navigate('/login')}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                          >
+                            Iniciar sesión para reservar
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
