@@ -6,18 +6,14 @@ import type { FlightBooking } from '../types';
 
 export default function BookingDetailPage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { logout } = useAuth();
   const { id } = useParams<{ id: string }>();
   const [booking, setBooking] = useState<FlightBooking | null>(null);
+  const [airlineName, setAirlineName] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-
     if (!id) {
       setError('ID de reserva no proporcionado');
       setLoading(false);
@@ -28,6 +24,8 @@ export default function BookingDetailPage() {
       try {
         const data = await flightsApi.getBooking(Number(id));
         setBooking(data);
+        const flight = await flightsApi.getById(data.flightId);
+        setAirlineName(flight.airlineName);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Error al cargar la reserva');
       } finally {
@@ -36,7 +34,12 @@ export default function BookingDetailPage() {
     };
 
     fetchBooking();
-  }, [id, isAuthenticated, navigate]);
+  }, [id]);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('es-PE', {
@@ -95,10 +98,7 @@ export default function BookingDetailPage() {
               Buscar Vuelos
             </button>
             <button
-              onClick={() => {
-                localStorage.removeItem('token');
-                navigate('/login');
-              }}
+              onClick={handleLogout}
               className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
             >
               Cerrar Sesión
@@ -119,6 +119,10 @@ export default function BookingDetailPage() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Número de Vuelo:</span>
                   <span className="font-medium text-gray-900">{booking.flightNumber}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Aerolínea:</span>
+                  <span className="font-medium text-gray-900">{airlineName}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Salida:</span>

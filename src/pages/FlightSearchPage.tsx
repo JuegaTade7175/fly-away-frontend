@@ -4,10 +4,30 @@ import { flightsApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 import type { Flight, FlightSearchRequest } from '../types';
 
+interface SearchForm {
+  flightNumber: string;
+  airlineName: string;
+  estDepartureTimeFrom: string;
+  estDepartureTimeTo: string;
+}
+
+function buildSearchParams(form: SearchForm): FlightSearchRequest {
+  const params: FlightSearchRequest = {};
+  if (form.flightNumber.trim()) params.flightNumber = form.flightNumber.trim();
+  if (form.airlineName.trim()) params.airlineName = form.airlineName.trim();
+  if (form.estDepartureTimeFrom) {
+    params.estDepartureTimeFrom = new Date(form.estDepartureTimeFrom).toISOString();
+  }
+  if (form.estDepartureTimeTo) {
+    params.estDepartureTimeTo = new Date(form.estDepartureTimeTo).toISOString();
+  }
+  return params;
+}
+
 export default function FlightSearchPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
-  const [search, setSearch] = useState<FlightSearchRequest>({
+  const { isAuthenticated, user, logout } = useAuth();
+  const [search, setSearch] = useState<SearchForm>({
     flightNumber: '',
     airlineName: '',
     estDepartureTimeFrom: '',
@@ -26,7 +46,7 @@ export default function FlightSearchPage() {
     setFlights([]);
 
     try {
-      const response = await flightsApi.search(search);
+      const response = await flightsApi.search(buildSearchParams(search));
       setFlights(response.items);
       if (response.items.length === 0) {
         setError('No se encontraron vuelos con los criterios especificados');
@@ -50,14 +70,18 @@ export default function FlightSearchPage() {
     try {
       const response = await flightsApi.book(flightId);
       setBookingSuccess(`¡Reserva exitosa! ID de reserva: ${response.id}`);
-      
-      // Save booking ID to localStorage for My Bookings page
+
       const savedBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
       savedBookings.push(response.id);
       localStorage.setItem('bookings', JSON.stringify(savedBookings));
     } catch (err: unknown) {
       setBookingError(err instanceof Error ? err.message : 'Error al reservar vuelo');
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   const formatDate = (dateString: string) => {
@@ -76,24 +100,44 @@ export default function FlightSearchPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white">Fly Away ✈️</h1>
-            {user && <p className="text-white/80 text-sm mt-1">Hola, {user.firstName} {user.lastName}</p>}
+            {user && (
+              <p className="text-white/80 text-sm mt-1">
+                Hola, {user.firstName} {user.lastName}
+              </p>
+            )}
           </div>
           <div className="flex gap-4">
-            <button
-              onClick={() => navigate('/bookings')}
-              className="bg-white text-blue-900 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              Mis Reservas
-            </button>
-            <button
-              onClick={() => {
-                localStorage.removeItem('token');
-                navigate('/login');
-              }}
-              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
-            >
-              Cerrar Sesión
-            </button>
+            {isAuthenticated ? (
+              <>
+                <button
+                  onClick={() => navigate('/bookings')}
+                  className="bg-white text-blue-900 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  Mis Reservas
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Cerrar Sesión
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate('/login')}
+                  className="bg-white text-blue-900 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  Iniciar Sesión
+                </button>
+                <button
+                  onClick={() => navigate('/register')}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Registrarse
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -198,7 +242,7 @@ export default function FlightSearchPage() {
                       <td className="px-4 py-3 text-sm">
                         <button
                           onClick={() => handleBook(flight.id)}
-                          disabled={!isAuthenticated || flight.availableSeats === 0}
+                          disabled={isAuthenticated && flight.availableSeats === 0}
                           className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                         >
                           {isAuthenticated ? 'Reservar' : 'Inicia sesión para reservar'}

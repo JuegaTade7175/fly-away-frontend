@@ -21,11 +21,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/search" element={
-            <ProtectedRoute>
-              <FlightSearchPage />
-            </ProtectedRoute>
-          } />
+          <Route path="/search" element={<FlightSearchPage />} />
           <Route path="/bookings" element={
             <ProtectedRoute>
               <MyBookingsPage />
@@ -36,7 +32,7 @@ function App() {
               <BookingDetailPage />
             </ProtectedRoute>
           } />
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<Navigate to="/search" replace />} />
         </Routes>
       </Router>
     </AuthProvider>

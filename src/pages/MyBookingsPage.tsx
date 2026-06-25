@@ -2,24 +2,19 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { flightsApi } from '../api';
 import { useAuth } from '../context/AuthContext';
-import type { FlightBooking } from '../types';
+import type { FlightBookingWithAirline } from '../types';
 
 export default function MyBookingsPage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  const [bookings, setBookings] = useState<FlightBooking[]>([]);
+  const { logout } = useAuth();
+  const [bookings, setBookings] = useState<FlightBookingWithAirline[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-
     const fetchBookings = async () => {
       const savedBookingIds = JSON.parse(localStorage.getItem('bookings') || '[]');
-      
+
       if (savedBookingIds.length === 0) {
         setLoading(false);
         return;
@@ -27,7 +22,11 @@ export default function MyBookingsPage() {
 
       try {
         const bookingDetails = await Promise.all(
-          savedBookingIds.map((id: number) => flightsApi.getBooking(id))
+          savedBookingIds.map(async (id: number) => {
+            const booking = await flightsApi.getBooking(id);
+            const flight = await flightsApi.getById(booking.flightId);
+            return { ...booking, airlineName: flight.airlineName };
+          })
         );
         setBookings(bookingDetails);
       } catch (err: unknown) {
@@ -38,7 +37,12 @@ export default function MyBookingsPage() {
     };
 
     fetchBookings();
-  }, [isAuthenticated, navigate]);
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('es-PE', {
@@ -71,10 +75,7 @@ export default function MyBookingsPage() {
               Buscar Vuelos
             </button>
             <button
-              onClick={() => {
-                localStorage.removeItem('token');
-                navigate('/login');
-              }}
+              onClick={handleLogout}
               className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
             >
               Cerrar Sesión
@@ -112,26 +113,18 @@ export default function MyBookingsPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-gray-100">
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">ID Reserva</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Vuelo</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Fecha Reserva</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Aerolínea</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Salida</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Llegada</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Pasajero</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acción</th>
                     </tr>
                   </thead>
                   <tbody>
                     {bookings.map((booking) => (
                       <tr key={booking.id} className="border-b hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">#{booking.id}</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">{booking.flightNumber}</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">{formatDate(booking.bookingDate)}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{booking.flightNumber}</td>
+                        <td className="px-4 py-3 text-sm text-gray-700">{booking.airlineName}</td>
                         <td className="px-4 py-3 text-sm text-gray-700">{formatDate(booking.estDepartureTime)}</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">{formatDate(booking.estArrivalTime)}</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          {booking.customerFirstName} {booking.customerLastName}
-                        </td>
                         <td className="px-4 py-3 text-sm">
                           <button
                             onClick={() => navigate(`/bookings/${booking.id}`)}

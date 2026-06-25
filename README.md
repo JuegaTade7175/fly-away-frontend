@@ -32,11 +32,19 @@ npm install
 
 ### Variables de Entorno
 
-El archivo `.env` ya esta configurado:
+En desarrollo, `.env` deja `VITE_API_URL` vacío para que Vite haga proxy al backend (evita errores CORS):
+
+```env
+VITE_API_URL=
+```
+
+Para producción, apunta al backend:
 
 ```env
 VITE_API_URL=http://localhost:8081
 ```
+
+> **Nota:** El frontend corre en `http://localhost:5174`. Si ves "Network Error" al registrar/login, reinicia el backend (necesita CORS habilitado) y el frontend (`npm run dev`).
 
 ### Ejecutar la Aplicacion
 
@@ -44,7 +52,7 @@ VITE_API_URL=http://localhost:8081
 npm run dev
 ```
 
-La aplicacion estara disponible en `http://localhost:5173`
+La aplicacion estara disponible en `http://localhost:5174`
 
 ### Build para Produccion
 
@@ -52,6 +60,7 @@ La aplicacion estara disponible en `http://localhost:5173`
 npm run build
 npm run typecheck
 npm run lint
+npm run preview
 ```
 
 ## Funcionalidades
@@ -60,7 +69,8 @@ npm run lint
 - **Login de Usuario** - Autenticacion basada en JWT con localStorage
 - **Busqueda de Vuelos** - Buscar vuelos por numero, aerolinea y rango de fechas
 - **Reserva de Vuelos** - Reservar vuelos para usuarios autenticados
-- **Mis Reservas** - Ver todas las reservas de vuelos
+- **Mis Reservas** - Ver todas las reservas de vuelos (numero, aerolinea, salida)
+- **Detalle de Reserva** - Ver informacion completa de una reserva
 
 ## Estructura del Proyecto
 
@@ -72,7 +82,8 @@ src/
 │   ├── LoginPage.tsx
 │   ├── RegisterPage.tsx
 │   ├── FlightSearchPage.tsx
-│   └── MyBookingsPage.tsx
+│   ├── MyBookingsPage.tsx
+│   └── BookingDetailPage.tsx
 ├── types/         # Definiciones de tipos TypeScript
 ├── App.tsx        # App principal con rutas
 ├── main.tsx       # Punto de entrada
