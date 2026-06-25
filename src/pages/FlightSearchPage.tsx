@@ -123,7 +123,7 @@ export default function FlightSearchPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Salta Desde</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Salida Desde</label>
               <input
                 type="datetime-local"
                 value={search.estDepartureTimeFrom}
@@ -133,7 +133,7 @@ export default function FlightSearchPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Salta Hasta</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Salida Hasta</label>
               <input
                 type="datetime-local"
                 value={search.estDepartureTimeTo}

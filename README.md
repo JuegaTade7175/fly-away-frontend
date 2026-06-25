@@ -26,7 +26,7 @@ Aplicacion frontend para Fly Away - un sistema de reserva de vuelos.
 ### Instalacion
 
 ```bash
-cd dummy-frontend
+cd fly-away-frontend
 npm install
 ```
 

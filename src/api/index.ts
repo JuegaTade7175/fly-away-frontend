@@ -7,10 +7,11 @@ import type {
   Message, Notification, Payment, PaymentMethod, Review,
   Availability, DayOfWeek,
   FlightSearchRequest, FlightSearchResponse,
+  FlightBooking,
 } from '../types';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8080',
+  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8081',
 });
 
 api.interceptors.request.use((config) => {
@@ -210,7 +211,7 @@ export const flightsApi = {
   book: (flightId: number) =>
     api.post<{ id: number }>('/flights/book', { flightId }).then((r) => r.data),
   getBooking: (id: number) =>
-    api.get<Booking>(`/flights/book/${id}`).then((r) => r.data),
+    api.get<FlightBooking>(`/flights/book/${id}`).then((r) => r.data),
 };
 
 export default api;

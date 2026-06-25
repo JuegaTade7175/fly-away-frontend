@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { flightsApi } from '../api';
 import { useAuth } from '../context/AuthContext';
-import type { Booking } from '../types';
+import type { FlightBooking } from '../types';
 
 export default function BookingDetailPage() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { id } = useParams<{ id: string }>();
-  const [booking, setBooking] = useState<Booking | null>(null);
+  const [booking, setBooking] = useState<FlightBooking | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 

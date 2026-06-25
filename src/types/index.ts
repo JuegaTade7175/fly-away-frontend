@@ -215,7 +215,7 @@ export interface FlightSearchResponse {
   items: Flight[];
 }
 
-export interface Booking {
+export interface FlightBooking {
   id: number;
   bookingDate: string;
   flightId: number;
@@ -227,6 +227,6 @@ export interface Booking {
   customerLastName: string;
 }
 
-export interface CreateBookingRequest {
+export interface CreateFlightBookingRequest {
   flightId: number;
 }
